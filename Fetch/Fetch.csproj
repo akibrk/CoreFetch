@@ -8,6 +8,13 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
 	<PropertyGroup>
 		<PackageId>Akibrk.Utility.Fetch</PackageId>
 		<Version>0.9.0</Version>
@@ -19,6 +26,7 @@
 		<PackageProjectUrl>https://github.com/akibrk/CoreFetch</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/akibrk/CoreFetch.git</RepositoryUrl>
 		<PackageReleaseNotes>Initial release</PackageReleaseNotes>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
 	
 </Project>
