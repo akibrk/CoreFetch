@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Fetch
+namespace Akibrk.Utility.Fetch
 {
     public class FetchResponse<T>
     {

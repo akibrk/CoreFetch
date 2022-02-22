@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace Fetch
+namespace Akibrk.Utility.Fetch
 {
     public interface IFetch
     {

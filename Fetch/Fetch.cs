@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
 
-namespace Fetch
+namespace Akibrk.Utility.Fetch
 {
-    public class Fetch: IFetch
+    public class Fetch : IFetch
     {
         private readonly HttpClient _client;
         public Fetch()
@@ -68,7 +68,7 @@ namespace Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore});
+                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
@@ -82,19 +82,20 @@ namespace Fetch
 
         public async Task<FetchResponse<T>> Post<T>(string uri, dynamic body, HttpHeaders headers = null)
         {
-            if(body is not string)
+            if (body is not string)
             {
                 body = JsonConvert.SerializeObject(body);
-            } 
+            }
 
             var request = new HttpRequestMessage
             {
-                RequestUri = _client.BaseAddress == null ? new Uri(uri): new Uri(_client.BaseAddress, uri),
+                RequestUri = _client.BaseAddress == null ? new Uri(uri) : new Uri(_client.BaseAddress, uri),
                 Method = HttpMethod.Post,
                 Content = new StringContent(body, Encoding.UTF8, "application/json"),
             };
 
-            if (headers != null) {
+            if (headers != null)
+            {
                 foreach (var header in headers)
                 {
                     request.Content.Headers.Add(header.Key, header.Value);
@@ -109,9 +110,10 @@ namespace Fetch
                 {
                     return new FetchResponse<T>(response.StatusCode);
 
-                }else if (!response.IsSuccessStatusCode)
+                }
+                else if (!response.IsSuccessStatusCode)
                 {
-                    return new FetchResponse<T>(response.StatusCode, response.ReasonPhrase , await response.Content.ReadAsStringAsync());
+                    return new FetchResponse<T>(response.StatusCode, response.ReasonPhrase, await response.Content.ReadAsStringAsync());
                 }
                 else
                 {
@@ -170,7 +172,7 @@ namespace Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore});
+                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
@@ -215,14 +217,14 @@ namespace Fetch
                 }
                 else if (!response.IsSuccessStatusCode)
                 {
-                    return new FetchResponse<T>(response.StatusCode, response.ReasonPhrase , await response.Content.ReadAsStringAsync());
+                    return new FetchResponse<T>(response.StatusCode, response.ReasonPhrase, await response.Content.ReadAsStringAsync());
                 }
                 else
                 {
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore});
+                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
@@ -266,7 +268,9 @@ namespace Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore,
+                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
                         // Handle the case where razorpay has incorrect data type when there are no notes
                         Error = (sender, args) =>
                         {
