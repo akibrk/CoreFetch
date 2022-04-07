@@ -1,12 +1,15 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace Akibrk.Utility.Fetch
+namespace Akibrk.Utility
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class Fetch : IFetch
     {
         private readonly HttpClient _client;
@@ -22,7 +25,7 @@ namespace Akibrk.Utility.Fetch
             };
         }
 
-        public Fetch(string baseURL, HttpHeaders defaultHeaders)
+        public Fetch(string baseURL, IEnumerable<KeyValuePair<string, string>> defaultHeaders)
         {
             _client = new HttpClient
             {
@@ -36,12 +39,12 @@ namespace Akibrk.Utility.Fetch
 
         }
 
-        public async Task<FetchResponse<T>> Get<T>(string uri, HttpHeaders headers = null)
+        public async Task<FetchResponse<T>> Get<T>(string uri, IEnumerable<KeyValuePair<string, string>> headers = null)
         {
             try
             {
                 // Create the request
-                HttpRequestMessage request = new(HttpMethod.Get, uri);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
 
                 if (headers != null)
                 {
@@ -68,7 +71,7 @@ namespace Akibrk.Utility.Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                    T data = JsonConvert.DeserializeObject<T>(content);
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
@@ -80,18 +83,18 @@ namespace Akibrk.Utility.Fetch
             }
         }
 
-        public async Task<FetchResponse<T>> Post<T>(string uri, dynamic body, HttpHeaders headers = null)
+        public async Task<FetchResponse<T>> Post<T>(string uri, dynamic body, IEnumerable<KeyValuePair<string, string>> headers = null)
         {
-            if (body is not string)
+            if (body.GetType() != typeof(string))
             {
                 body = JsonConvert.SerializeObject(body);
             }
 
             var request = new HttpRequestMessage
             {
-                RequestUri = _client.BaseAddress == null ? new Uri(uri) : new Uri(_client.BaseAddress, uri),
+                RequestUri = new Uri(uri, UriKind.Relative),
                 Method = HttpMethod.Post,
-                Content = new StringContent(body, Encoding.UTF8, "application/json"),
+                Content = new StringContent(body)
             };
 
             if (headers != null)
@@ -101,6 +104,8 @@ namespace Akibrk.Utility.Fetch
                     request.Content.Headers.Add(header.Key, header.Value);
                 }
             }
+
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             try
             {
@@ -120,7 +125,7 @@ namespace Akibrk.Utility.Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                    T data = JsonConvert.DeserializeObject<T>(content);
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
@@ -132,18 +137,18 @@ namespace Akibrk.Utility.Fetch
             }
         }
 
-        public async Task<FetchResponse<T>> Put<T>(string uri, dynamic body, HttpHeaders headers = null)
+        public async Task<FetchResponse<T>> Put<T>(string uri, dynamic body, IEnumerable<KeyValuePair<string, string>> headers = null)
         {
-            if (body is not string)
+            if (body.GetType() != typeof(string))
             {
                 body = JsonConvert.SerializeObject(body);
             }
 
             var request = new HttpRequestMessage
             {
-                RequestUri = _client.BaseAddress == null ? new Uri(uri) : new Uri(_client.BaseAddress, uri),
+                RequestUri = new Uri(uri),
                 Method = HttpMethod.Put,
-                Content = new StringContent(body, Encoding.UTF8, "application/json"),
+                Content = new StringContent(body),
             };
 
             if (headers != null)
@@ -172,7 +177,7 @@ namespace Akibrk.Utility.Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                    T data = JsonConvert.DeserializeObject<T>(content);
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
@@ -184,18 +189,18 @@ namespace Akibrk.Utility.Fetch
             }
         }
 
-        public async Task<FetchResponse<T>> Patch<T>(string uri, dynamic body, HttpHeaders headers = null)
+        public async Task<FetchResponse<T>> Patch<T>(string uri, dynamic body, IEnumerable<KeyValuePair<string, string>> headers = null)
         {
-            if (body is not string)
+            if (body.GetType() != typeof(string))
             {
                 body = JsonConvert.SerializeObject(body);
             }
 
             var request = new HttpRequestMessage
             {
-                RequestUri = _client.BaseAddress == null ? new Uri(uri) : new Uri(_client.BaseAddress, uri),
+                RequestUri = new Uri(uri),
                 Method = HttpMethod.Patch,
-                Content = new StringContent(body, Encoding.UTF8, "application/json"),
+                Content = new StringContent(body),
             };
 
             if (headers != null)
@@ -224,7 +229,7 @@ namespace Akibrk.Utility.Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                    T data = JsonConvert.DeserializeObject<T>(content);
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
@@ -236,12 +241,12 @@ namespace Akibrk.Utility.Fetch
             }
         }
 
-        public async Task<FetchResponse<T>> Delete<T>(string uri, HttpHeaders headers = null)
+        public async Task<FetchResponse<T>> Delete<T>(string uri, IEnumerable<KeyValuePair<string, string>> headers = null)
         {
             try
             {
                 // Create the request
-                HttpRequestMessage request = new(HttpMethod.Delete, uri);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, uri);
 
                 if (headers != null)
                 {
@@ -268,18 +273,7 @@ namespace Akibrk.Utility.Fetch
                     var content = await response.Content.ReadAsStringAsync();
                     // We assume the content is the JSON response we are expecting
                     // Try parsing the response to an Object
-                    T data = JsonConvert.DeserializeObject<T>(content, new JsonSerializerSettings
-                    {
-                        NullValueHandling = NullValueHandling.Ignore,
-                        // Handle the case where razorpay has incorrect data type when there are no notes
-                        Error = (sender, args) =>
-                        {
-                            if (Equals(args.ErrorContext.Member, "notes"))
-                            {
-                                args.ErrorContext.Handled = true;
-                            }
-                        }
-                    });
+                    T data = JsonConvert.DeserializeObject<T>(content);
                     return new FetchResponse<T>(response.StatusCode, data);
                 }
 
